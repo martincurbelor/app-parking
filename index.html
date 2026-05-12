@@ -71,13 +71,12 @@
 
     /* ── Layout principal ── */
     main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 36px 24px 56px;
+      padding: 28px 32px 48px;
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 20px;
-      align-items: start;
+      align-items: stretch;
+      min-height: calc(100vh - 68px);
     }
     @media (max-width: 860px) {
       main { grid-template-columns: 1fr 1fr; }
@@ -91,7 +90,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 26px 28px;
+      padding: 28px 32px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
@@ -148,8 +147,9 @@
     .btn-primary { background: var(--magenta); color: #fff; }
     .btn-primary:hover { background: var(--magenta2); }
 
-    /* ── Panel derecho ── */
+    /* ── Columna izquierda ── */
     .right-col { display: flex; flex-direction: column; gap: 16px; }
+    .right-col .card { flex: 1; }
 
     /* Precios */
     .precios {
@@ -201,9 +201,16 @@
       background: var(--success-bg);
       border: 1px solid var(--success-border);
       border-radius: 12px;
-      padding: 24px 28px;
+      padding: 28px 32px;
       text-align: center;
       box-shadow: 0 2px 10px rgba(5,122,85,.1);
+      align-self: stretch;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #resultado.visible {
+      display: flex;
     }
     #resultado .res-label {
       font-size: .75rem;
@@ -249,8 +256,21 @@
 
 <main>
 
-  <!-- Columna izquierda: tarifas + instrucciones -->
+  <!-- Columna izquierda: instrucciones + tarifas -->
   <div class="right-col">
+    <div class="card">
+      <div class="card-title">Instrucciones</div>
+      <div class="instrucciones">
+        <ol>
+          <li>Seleccioná el tipo de vehículo.</li>
+          <li>Ingresá la patente o identificación.</li>
+          <li>Seleccioná la fecha y hora de ingreso y de salida.</li>
+          <li>Presioná <strong>Calcular y guardar</strong>.</li>
+          <li>Informá al cliente el total que aparece a continuación.</li>
+        </ol>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">Tarifas</div>
       <div class="precios">
@@ -268,19 +288,6 @@
         </div>
       </div>
       <p class="precio-nota">Se cobra por hora o fracción iniciada.</p>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Instrucciones</div>
-      <div class="instrucciones">
-        <ol>
-          <li>Seleccioná el tipo de vehículo.</li>
-          <li>Ingresá la patente o identificación.</li>
-          <li>Seleccioná la fecha y hora de ingreso y de salida.</li>
-          <li>Presioná <strong>Calcular y guardar</strong>.</li>
-          <li>Informá al cliente el total que aparece a continuación.</li>
-        </ol>
-      </div>
     </div>
   </div>
 
@@ -400,7 +407,7 @@
       `${facturadas} hora${facturadas !== 1 ? 's' : ''} × ${moneda(tarifa)}/h` +
       (patente ? ` — ${patente}` : '');
     document.getElementById('sheet-status').textContent = '';
-    document.getElementById('resultado').style.display = 'block';
+    document.getElementById('resultado').classList.add('visible');
 
     resetForm();
 
