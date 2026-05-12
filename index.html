@@ -341,18 +341,20 @@
     return 350; // entre 3h y 12h: precio fijo
   }
 
+  function r(n) { return Math.round(n * 10000) / 10000; } // evita errores de float
+
   function calcularMontoAuto(horasTotal) {
     let monto = 0;
-    let restante = horasTotal;
+    let restante = r(horasTotal);
     while (restante > 0) {
-      const enEsteDia = Math.min(restante, 24);
-      const periodo1  = Math.min(enEsteDia, 12);
+      const enEsteDia = r(Math.min(restante, 24));
+      const periodo1  = r(Math.min(enEsteDia, 12));
       let montoDia    = montoPeriodo12h(periodo1);
       if (enEsteDia > 12) {
-        montoDia += montoPeriodo12h(enEsteDia - 12);
+        montoDia += montoPeriodo12h(r(enEsteDia - 12));
       }
       monto    += Math.min(montoDia, 600);
-      restante -= enEsteDia;
+      restante  = r(restante - enEsteDia);
     }
     return monto;
   }
@@ -443,10 +445,14 @@
 
     const monto = calcularMonto(tipo, decimal);
 
-    const hDisplay = decimal.toFixed(1).replace('.', ',');
+    const hTot = Math.floor(decimal);
+    const mTot = Math.round((decimal - hTot) * 60);
+    const hDisplay = hTot > 0 && mTot > 0 ? `${hTot}h ${mTot}min`
+                   : hTot > 0              ? `${hTot}h`
+                   :                         `${mTot}min`;
     document.getElementById('res-monto').textContent = moneda(monto);
     document.getElementById('res-detail').textContent =
-      `${hDisplay}h de estadía` + (patente ? ` — ${patente}` : '');
+      `${hDisplay} de estadía` + (patente ? ` — ${patente}` : '');
     document.getElementById('sheet-status').textContent = '';
     document.getElementById('resultado').classList.add('visible');
 
