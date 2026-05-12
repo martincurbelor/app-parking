@@ -279,8 +279,21 @@
           <div class="tt-row"><span>2 horas</span><span>$220</span></div>
           <div class="tt-row"><span>2½ horas</span><span>$260</span></div>
           <div class="tt-row"><span>3 horas</span><span>$320</span></div>
-          <div class="tt-row tt-cap"><span>+3h hasta 12h</span><span>$350</span></div>
-          <div class="tt-row tt-max"><span>Máx. por día</span><span>$600</span></div>
+          <div class="tt-row tt-cap"><span>+3h hasta 12h (1 piso)</span><span>$350</span></div>
+          <div class="tt-row tt-max"><span>+12h hasta 24h (1 día)</span><span>$600</span></div>
+        </div>
+      </div>
+
+      <div class="tarifa-bloque" style="margin-top:16px">
+        <div class="tarifa-vehiculo">🚙 Camioneta</div>
+        <div class="tarifa-tabla">
+          <div class="tt-row"><span>1 hora</span><span>$130</span></div>
+          <div class="tt-row"><span>1½ horas</span><span>$190</span></div>
+          <div class="tt-row"><span>2 horas</span><span>$245</span></div>
+          <div class="tt-row"><span>2½ horas</span><span>$310</span></div>
+          <div class="tt-row"><span>3 horas</span><span>$370</span></div>
+          <div class="tt-row tt-cap"><span>+3h hasta 12h (1 piso)</span><span>$395</span></div>
+          <div class="tt-row tt-max"><span>+12h hasta 24h (1 día)</span><span>$700</span></div>
         </div>
       </div>
 
@@ -291,7 +304,7 @@
         </div>
       </div>
 
-      <p class="precio-nota" style="margin-top:12px">Fracción de hora se cobra como hora completa.</p>
+      <p class="precio-nota" style="margin-top:12px">Fracción se cobra como tramo completo. Pasadas las 12h se cobra el día completo (24h).</p>
     </div>
   </div>
 
@@ -330,43 +343,52 @@
 <script>
   /* ── Lógica de tarifas ── */
 
-  function montoPeriodo12h(horas) {
-    // Redondea hacia arriba a la fracción de 30 min más cercana (dentro de los primeros 3h)
-    if (horas <= 0) return 0;
+  // Tarifa para los primeros 3h (Auto)
+  function tieredAuto(horas) {
+    if (horas <= 0)   return 0;
     if (horas <= 1)   return 120;
     if (horas <= 1.5) return 170;
     if (horas <= 2)   return 220;
     if (horas <= 2.5) return 260;
     if (horas <= 3)   return 320;
-    return 350; // entre 3h y 12h: precio fijo
+    return 350;
   }
 
-  function r(n) { return Math.round(n * 10000) / 10000; } // evita errores de float
+  // Tarifa para los primeros 3h (Camioneta)
+  function tieredCamioneta(horas) {
+    if (horas <= 0)   return 0;
+    if (horas <= 1)   return 130;
+    if (horas <= 1.5) return 190;
+    if (horas <= 2)   return 245;
+    if (horas <= 2.5) return 310;
+    if (horas <= 3)   return 370;
+    return 395;
+  }
 
-  function calcularMontoAuto(horasTotal) {
-    let monto = 0;
-    let restante = r(horasTotal);
-    while (restante > 0) {
-      const enEsteDia = r(Math.min(restante, 24));
-      const periodo1  = r(Math.min(enEsteDia, 12));
-      let montoDia    = montoPeriodo12h(periodo1);
-      if (enEsteDia > 12) {
-        montoDia += montoPeriodo12h(r(enEsteDia - 12));
-      }
-      monto    += Math.min(montoDia, 600);
-      restante  = r(restante - enEsteDia);
+  // Lógica:
+  //  · Cada 24h completas = 1 día (precio propio).
+  //  · El resto: hasta 3h tramos, hasta 12h = 1 piso, pasadas 12h = se cobra el día.
+  function calcularMontoVehiculo(horas, tiered, pisoPrecio, diaPrecio) {
+    if (horas <= 0) return 0;
+    const diasCompletos = Math.floor(horas / 24);
+    const resto = horas - diasCompletos * 24;
+    let monto = diasCompletos * diaPrecio;
+    if (resto > 0) {
+      if      (resto <= 3)  monto += tiered(resto);
+      else if (resto <= 12) monto += pisoPrecio;
+      else                  monto += diaPrecio;
     }
     return monto;
   }
 
-  function calcularMontoBici(horasTotal) {
-    return Math.ceil(horasTotal) * 13;
-  }
+  function calcularMontoAuto(horas)      { return calcularMontoVehiculo(horas, tieredAuto,      350, 600); }
+  function calcularMontoCamioneta(horas) { return calcularMontoVehiculo(horas, tieredCamioneta, 395, 700); }
+  function calcularMontoBici(horas)      { return Math.ceil(horas) * 13; }
 
   function calcularMonto(tipo, horasDecimal) {
     if (tipo === 'Auto')      return calcularMontoAuto(horasDecimal);
+    if (tipo === 'Camioneta') return calcularMontoCamioneta(horasDecimal);
     if (tipo === 'Bici')      return calcularMontoBici(horasDecimal);
-    if (tipo === 'Camioneta') return 0; // pendiente
     return 0;
   }
 
@@ -445,23 +467,26 @@
     if (h <= 2)   return 2;
     if (h <= 2.5) return 2.5;
     if (h <= 3)   return 3;
-    return 12; // zona flat hasta 12h → período completo
+    return 12; // zona flat: 1 piso = 12h
   }
 
   function descripcionCobro(tipo, horasTotal) {
     if (tipo === 'Bici') {
       return `cobro de ${Math.ceil(horasTotal)}h`;
     }
-    if (tipo === 'Auto') {
-      let totalBill = 0;
-      let restante = horasTotal;
-      while (restante > 0) {
-        const enEsteDia = Math.min(restante, 24);
-        totalBill += ceilingTier(Math.min(enEsteDia, 12));
-        if (enEsteDia > 12) totalBill += ceilingTier(enEsteDia - 12);
-        restante -= enEsteDia;
+    if (tipo === 'Auto' || tipo === 'Camioneta') {
+      let dias = Math.floor(horasTotal / 24);
+      const resto = horasTotal - dias * 24;
+      let horasBilled = 0;
+      if (resto > 0) {
+        if      (resto <= 3)  horasBilled = ceilingTier(resto);
+        else if (resto <= 12) horasBilled = 12;
+        else { dias += 1; horasBilled = 0; }
       }
-      return `cobro de ${fmtHM(totalBill)}`;
+      const partes = [];
+      if (dias > 0)        partes.push(`${dias} día${dias > 1 ? 's' : ''}`);
+      if (horasBilled > 0) partes.push(fmtHM(horasBilled));
+      return partes.length ? `cobro de ${partes.join(' ')}` : '';
     }
     return '';
   }
