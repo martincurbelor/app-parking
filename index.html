@@ -175,6 +175,38 @@
     .tt-max { background: rgba(26,43,107,.08) !important; font-weight: 600; }
     .tt-max span:last-child { color: var(--navy); }
 
+    /* Tabla de tarifas con columnas (Auto + Camioneta) */
+    .tarifa-tabla-cols { display: flex; flex-direction: column; gap: 3px; }
+    .ttc-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 6px;
+      font-size: .84rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      align-items: center;
+      color: var(--text);
+    }
+    .ttc-header {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: .78rem;
+      letter-spacing: .3px;
+      color: var(--navy);
+      text-transform: uppercase;
+      padding: 4px 8px 6px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2px;
+    }
+    .ttc-header span:not(:first-child),
+    .ttc-row span:not(:first-child) { text-align: right; }
+    .ttc-row span:not(:first-child) { font-weight: 600; color: var(--navy); }
+    .ttc-row:nth-child(odd) { background: var(--bg); }
+    .ttc-cap { background: rgba(196,0,106,.06) !important; }
+    .ttc-cap span:not(:first-child) { color: var(--magenta); }
+    .ttc-max { background: rgba(26,43,107,.08) !important; font-weight: 600; }
+    .ttc-max span:not(:first-child) { color: var(--navy); }
+
     .precio-nota {
       font-size: .75rem;
       color: var(--muted);
@@ -210,24 +242,24 @@
       display: flex;
     }
     #resultado .res-label {
-      font-size: .75rem;
+      font-size: .9rem;
       text-transform: uppercase;
-      letter-spacing: .5px;
+      letter-spacing: .6px;
       color: var(--success);
       font-weight: 600;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
     }
     #resultado .res-monto {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 3rem;
+      font-size: 4.5rem;
       font-weight: 900;
       color: var(--success);
       line-height: 1;
     }
     #resultado .res-detail {
-      font-size: .82rem;
+      font-size: 1rem;
       color: var(--muted);
-      margin-top: 8px;
+      margin-top: 12px;
     }
     #sheet-status {
       font-size: .75rem;
@@ -271,30 +303,19 @@
     <div class="card">
       <div class="card-title">Tarifas</div>
 
-      <div class="tarifa-bloque">
-        <div class="tarifa-vehiculo">🚗 Auto</div>
-        <div class="tarifa-tabla">
-          <div class="tt-row"><span>1 hora</span><span>$120</span></div>
-          <div class="tt-row"><span>1½ horas</span><span>$170</span></div>
-          <div class="tt-row"><span>2 horas</span><span>$220</span></div>
-          <div class="tt-row"><span>2½ horas</span><span>$260</span></div>
-          <div class="tt-row"><span>3 horas</span><span>$320</span></div>
-          <div class="tt-row tt-cap"><span>+3h hasta 12h (1 piso)</span><span>$350</span></div>
-          <div class="tt-row tt-max"><span>+12h hasta 24h (1 día)</span><span>$600</span></div>
+      <div class="tarifa-tabla-cols">
+        <div class="ttc-row ttc-header">
+          <span>Tramo</span>
+          <span>🚗 Auto</span>
+          <span>🚙 Cam.</span>
         </div>
-      </div>
-
-      <div class="tarifa-bloque" style="margin-top:16px">
-        <div class="tarifa-vehiculo">🚙 Camioneta</div>
-        <div class="tarifa-tabla">
-          <div class="tt-row"><span>1 hora</span><span>$130</span></div>
-          <div class="tt-row"><span>1½ horas</span><span>$190</span></div>
-          <div class="tt-row"><span>2 horas</span><span>$245</span></div>
-          <div class="tt-row"><span>2½ horas</span><span>$310</span></div>
-          <div class="tt-row"><span>3 horas</span><span>$370</span></div>
-          <div class="tt-row tt-cap"><span>+3h hasta 12h (1 piso)</span><span>$395</span></div>
-          <div class="tt-row tt-max"><span>+12h hasta 24h (1 día)</span><span>$700</span></div>
-        </div>
+        <div class="ttc-row"><span>1 hora</span><span>$120</span><span>$130</span></div>
+        <div class="ttc-row"><span>1½ horas</span><span>$170</span><span>$190</span></div>
+        <div class="ttc-row"><span>2 horas</span><span>$220</span><span>$245</span></div>
+        <div class="ttc-row"><span>2½ horas</span><span>$260</span><span>$310</span></div>
+        <div class="ttc-row"><span>3 horas</span><span>$320</span><span>$370</span></div>
+        <div class="ttc-row ttc-cap"><span>+3h a 12h (piso)</span><span>$350</span><span>$395</span></div>
+        <div class="ttc-row ttc-max"><span>+12h a 24h (día)</span><span>$600</span><span>$700</span></div>
       </div>
 
       <div class="tarifa-bloque" style="margin-top:16px">
