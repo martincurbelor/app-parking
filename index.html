@@ -432,6 +432,35 @@
     }
   }
 
+  function fmtHM(h) {
+    const hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+    if (hh > 0 && mm > 0) return `${hh}h ${mm}min`;
+    if (hh > 0) return `${hh}h`;
+    return `${mm}min`;
+  }
+
+  function descripcionCobro(tipo, horasTotal) {
+    if (tipo === 'Bici') {
+      return `cobro de ${Math.ceil(horasTotal)}h`;
+    }
+    if (tipo === 'Auto') {
+      const tramos = [];
+      let restante = horasTotal;
+      let dia = 1;
+      while (restante > 0) {
+        const enEsteDia = Math.min(restante, 24);
+        const p1 = Math.min(enEsteDia, 12);
+        const label = horasTotal > 24 ? `Día ${dia} ` : '';
+        tramos.push(`${label}tramo 1: ${fmtHM(p1)}`);
+        if (enEsteDia > 12) tramos.push(`${label}tramo 2: ${fmtHM(enEsteDia - 12)}`);
+        restante -= enEsteDia;
+        dia++;
+      }
+      return `cobro de ${tramos.join(' + ')}`;
+    }
+    return '';
+  }
+
   async function calcular() {
     const tipo    = document.getElementById('tipo').value;
     const patente = document.getElementById('patente').value.trim().toUpperCase();
@@ -454,9 +483,12 @@
     if (horas > 0) partes.push(`${horas}h`);
     if (mins  > 0) partes.push(`${mins}min`);
     const hDisplay = partes.length > 0 ? partes.join(' ') : '0min';
+
+    const cobro = descripcionCobro(tipo, decimal);
+
     document.getElementById('res-monto').textContent = moneda(monto);
     document.getElementById('res-detail').textContent =
-      `${hDisplay} de estadía` + (patente ? ` — ${patente}` : '');
+      `${hDisplay} de estadía · ${cobro}` + (patente ? ` — ${patente}` : '');
     document.getElementById('sheet-status').textContent = '';
     document.getElementById('resultado').classList.add('visible');
 
