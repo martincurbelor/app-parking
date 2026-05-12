@@ -10,32 +10,43 @@ const SHEET_NAME = 'Parking';
 
 function doPost(e) {
   try {
-    const data   = JSON.parse(e.postData.contents);
-    const sheet  = getOrCreateSheet();
-    const ahora  = new Date().toLocaleString('es-AR', { timeZone: 'America/Montevideo' });
-
-    sheet.appendRow([
-      ahora,                  // Timestamp registro
-      data.tipo,              // Auto / Camioneta
-      data.patente,           // Patente
-      data.entrada,           // Fecha/hora ingreso
-      data.salida,            // Fecha/hora salida
-      data.facturadas,        // Horas facturadas
-      data.tarifa,            // Tarifa por hora
-      data.monto              // Total cobrado
-    ]);
-
+    const data  = JSON.parse(e.postData.contents);
+    guardarFila(data);
     return respuesta({ ok: true });
   } catch (err) {
     return respuesta({ ok: false, error: err.message });
   }
 }
 
-function doGet() {
+function doGet(e) {
+  const p = e.parameter;
+  if (p && p.tipo) {
+    try {
+      guardarFila(p);
+      return respuesta({ ok: true });
+    } catch (err) {
+      return respuesta({ ok: false, error: err.message });
+    }
+  }
   return respuesta({ ok: true, msg: 'API Parking activa' });
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+function guardarFila(data) {
+  const sheet = getOrCreateSheet();
+  const ahora = new Date().toLocaleString('es-AR', { timeZone: 'America/Montevideo' });
+  sheet.appendRow([
+    ahora,
+    data.tipo,
+    data.patente,
+    data.entrada,
+    data.salida,
+    Number(data.facturadas),
+    Number(data.tarifa),
+    Number(data.monto)
+  ]);
+}
 
 function getOrCreateSheet() {
   const ss    = SpreadsheetApp.getActiveSpreadsheet();

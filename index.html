@@ -409,13 +409,23 @@
     status.style.color = 'var(--muted)';
     status.textContent = '⏳ Guardando en Google Sheets...';
     try {
-      await fetch(SHEET_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(registro)
+      const params = new URLSearchParams({
+        tipo:       registro.tipo,
+        patente:    registro.patente,
+        entrada:    registro.entrada,
+        salida:     registro.salida,
+        facturadas: registro.facturadas,
+        tarifa:     registro.tarifa,
+        monto:      registro.monto
       });
-      status.style.color = 'var(--success)';
-      status.textContent = '✓ Guardado en Google Sheets';
+      const res = await fetch(SHEET_URL + '?' + params.toString(), { redirect: 'follow' });
+      const json = await res.json();
+      if (json.ok) {
+        status.style.color = 'var(--success)';
+        status.textContent = '✓ Guardado en Google Sheets';
+      } else {
+        throw new Error(json.error);
+      }
     } catch {
       status.style.color = 'var(--error)';
       status.textContent = '⚠ No se pudo guardar en Sheets (registro local guardado)';
