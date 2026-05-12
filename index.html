@@ -445,11 +445,15 @@
 
     const monto = calcularMonto(tipo, decimal);
 
-    const hTot = Math.floor(decimal);
-    const mTot = Math.round((decimal - hTot) * 60);
-    const hDisplay = hTot > 0 && mTot > 0 ? `${hTot}h ${mTot}min`
-                   : hTot > 0              ? `${hTot}h`
-                   :                         `${mTot}min`;
+    const totalMin = Math.floor(decimal * 60);
+    const dias  = Math.floor(totalMin / 1440);
+    const horas = Math.floor((totalMin % 1440) / 60);
+    const mins  = totalMin % 60;
+    const partes = [];
+    if (dias  > 0) partes.push(`${dias} día${dias > 1 ? 's' : ''}`);
+    if (horas > 0) partes.push(`${horas}h`);
+    if (mins  > 0) partes.push(`${mins}min`);
+    const hDisplay = partes.length > 0 ? partes.join(' ') : '0min';
     document.getElementById('res-monto').textContent = moneda(monto);
     document.getElementById('res-detail').textContent =
       `${hDisplay} de estadía` + (patente ? ` — ${patente}` : '');
