@@ -35,7 +35,12 @@ function doGet(e) {
 
 function guardarFila(data) {
   const sheet = getOrCreateSheet();
-  const ahora = new Date().toLocaleString('es-AR', { timeZone: 'America/Montevideo' });
+  const ahora = new Date().toLocaleString('es-AR', {
+    timeZone: 'America/Montevideo',
+    hour12: false,
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
   sheet.appendRow([
     ahora,
     data.tipo,
