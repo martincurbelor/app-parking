@@ -151,36 +151,33 @@
     .right-col { display: flex; flex-direction: column; gap: 16px; }
     .right-col .card { flex: 1; }
 
-    /* Precios */
-    .precios {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 0;
-    }
-    .precio-item {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 12px 8px;
-      text-align: center;
-    }
-    .precio-item .pv {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 900;
+    /* Tabla de tarifas */
+    .tarifa-bloque { }
+    .tarifa-vehiculo {
+      font-weight: 600;
+      font-size: .9rem;
       color: var(--navy);
+      margin-bottom: 6px;
     }
-    .precio-item .pl {
-      font-size: .7rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .3px;
-      margin-top: 3px;
+    .tarifa-tabla { display: flex; flex-direction: column; gap: 3px; }
+    .tt-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: .84rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: var(--text);
     }
+    .tt-row:nth-child(odd) { background: var(--bg); }
+    .tt-row span:last-child { font-weight: 600; color: var(--navy); }
+    .tt-cap { background: rgba(196,0,106,.06) !important; }
+    .tt-cap span:last-child { color: var(--magenta); }
+    .tt-max { background: rgba(26,43,107,.08) !important; font-weight: 600; }
+    .tt-max span:last-child { color: var(--navy); }
+
     .precio-nota {
       font-size: .75rem;
       color: var(--muted);
-      margin-top: 10px;
       text-align: center;
     }
 
@@ -273,21 +270,28 @@
 
     <div class="card">
       <div class="card-title">Tarifas</div>
-      <div class="precios">
-        <div class="precio-item">
-          <div class="pv">$500</div>
-          <div class="pl">Auto / hora</div>
-        </div>
-        <div class="precio-item">
-          <div class="pv">$700</div>
-          <div class="pl">Camioneta / hora</div>
-        </div>
-        <div class="precio-item">
-          <div class="pv">$200</div>
-          <div class="pl">Bici / hora</div>
+
+      <div class="tarifa-bloque">
+        <div class="tarifa-vehiculo">🚗 Auto</div>
+        <div class="tarifa-tabla">
+          <div class="tt-row"><span>1 hora</span><span>$120</span></div>
+          <div class="tt-row"><span>1½ horas</span><span>$170</span></div>
+          <div class="tt-row"><span>2 horas</span><span>$220</span></div>
+          <div class="tt-row"><span>2½ horas</span><span>$260</span></div>
+          <div class="tt-row"><span>3 horas</span><span>$320</span></div>
+          <div class="tt-row tt-cap"><span>+3h hasta 12h</span><span>$350</span></div>
+          <div class="tt-row tt-max"><span>Máx. por día</span><span>$600</span></div>
         </div>
       </div>
-      <p class="precio-nota">Se cobra por hora o fracción iniciada.</p>
+
+      <div class="tarifa-bloque" style="margin-top:16px">
+        <div class="tarifa-vehiculo">🚲 Bici</div>
+        <div class="tarifa-tabla">
+          <div class="tt-row"><span>Por hora</span><span>$13</span></div>
+        </div>
+      </div>
+
+      <p class="precio-nota" style="margin-top:12px">Fracción de hora se cobra como hora completa.</p>
     </div>
   </div>
 
@@ -324,7 +328,45 @@
 </main>
 
 <script>
-  const TARIFAS = { Auto: 500, Camioneta: 700, Bici: 200 };
+  /* ── Lógica de tarifas ── */
+
+  function montoPeriodo12h(horas) {
+    // Redondea hacia arriba a la fracción de 30 min más cercana (dentro de los primeros 3h)
+    if (horas <= 0) return 0;
+    if (horas <= 1)   return 120;
+    if (horas <= 1.5) return 170;
+    if (horas <= 2)   return 220;
+    if (horas <= 2.5) return 260;
+    if (horas <= 3)   return 320;
+    return 350; // entre 3h y 12h: precio fijo
+  }
+
+  function calcularMontoAuto(horasTotal) {
+    let monto = 0;
+    let restante = horasTotal;
+    while (restante > 0) {
+      const enEsteDia = Math.min(restante, 24);
+      const periodo1  = Math.min(enEsteDia, 12);
+      let montoDia    = montoPeriodo12h(periodo1);
+      if (enEsteDia > 12) {
+        montoDia += montoPeriodo12h(enEsteDia - 12);
+      }
+      monto    += Math.min(montoDia, 600);
+      restante -= enEsteDia;
+    }
+    return monto;
+  }
+
+  function calcularMontoBici(horasTotal) {
+    return Math.ceil(horasTotal) * 13;
+  }
+
+  function calcularMonto(tipo, horasDecimal) {
+    if (tipo === 'Auto')      return calcularMontoAuto(horasDecimal);
+    if (tipo === 'Bici')      return calcularMontoBici(horasDecimal);
+    if (tipo === 'Camioneta') return 0; // pendiente
+    return 0;
+  }
 
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwvvL-lXFqLJidD8peumF2WGRPhAf1EwTXoN61CgQ2jkEl-08yaz1V_qNYW7dGKBqiziw/exec';
 
@@ -399,19 +441,18 @@
     const { decimal, facturadas } = horasFraccion(entrada, salida);
     if (decimal <= 0) { alert('La salida debe ser posterior al ingreso.'); return; }
 
-    const tarifa = TARIFAS[tipo];
-    const monto  = facturadas * tarifa;
+    const monto = calcularMonto(tipo, decimal);
 
+    const hDisplay = decimal.toFixed(1).replace('.', ',');
     document.getElementById('res-monto').textContent = moneda(monto);
     document.getElementById('res-detail').textContent =
-      `${facturadas} hora${facturadas !== 1 ? 's' : ''} × ${moneda(tarifa)}/h` +
-      (patente ? ` — ${patente}` : '');
+      `${hDisplay}h de estadía` + (patente ? ` — ${patente}` : '');
     document.getElementById('sheet-status').textContent = '';
     document.getElementById('resultado').classList.add('visible');
 
     resetForm();
 
-    await enviarASheets({ tipo, patente: patente || '—', entrada, salida, facturadas, tarifa, monto });
+    await enviarASheets({ tipo, patente: patente || '—', entrada, salida, facturadas: decimal.toFixed(2), tarifa: '-', monto });
   }
 
   renderFecha();
