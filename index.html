@@ -311,11 +311,12 @@
         </div>
       </div>
 
-      <button class="btn btn-primary" onclick="calcular()">Calcular y guardar</button>
+      <button class="btn btn-primary" id="btn-guardar" onclick="calcular()">Calcular y guardar</button>
 
       <div id="resultado">
         <div class="res-monto" id="res-monto"></div>
         <div class="res-detail" id="res-detail"></div>
+        <div id="sheet-status" style="font-size:.78rem;margin-top:6px;"></div>
       </div>
     </div>
 
@@ -370,6 +371,9 @@
 <script>
   const KEY = 'axion_parking_v1';
 
+  // ── Pegá aquí la URL de tu Apps Script después de publicarlo ──
+  const SHEET_URL = '';
+
   /* ── Utilidades ── */
   function cargar() {
     try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; }
@@ -403,8 +407,27 @@
       `<strong>${dias[d.getDay()]}</strong>, ${d.toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' })}`;
   }
 
+  /* ── Enviar a Google Sheets ── */
+  async function enviarASheets(registro) {
+    if (!SHEET_URL) return;
+    const status = document.getElementById('sheet-status');
+    status.style.color = 'var(--muted)';
+    status.textContent = '⏳ Guardando en Google Sheets...';
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST',
+        body: JSON.stringify(registro)
+      });
+      status.style.color = 'var(--success)';
+      status.textContent = '✓ Guardado en Google Sheets';
+    } catch {
+      status.style.color = 'var(--error)';
+      status.textContent = '⚠ No se pudo guardar en Sheets (registro local guardado)';
+    }
+  }
+
   /* ── Calcular ── */
-  function calcular() {
+  async function calcular() {
     const tipo    = document.getElementById('tipo').value;
     const patente = document.getElementById('patente').value.trim().toUpperCase();
     const entrada = document.getElementById('entrada').value;
@@ -424,12 +447,17 @@
     document.getElementById('res-detail').textContent =
       `${facturadas} hora${facturadas !== 1 ? 's' : ''} × ${moneda(tarifa)}/h` +
       (patente ? ` — ${patente}` : '');
+    document.getElementById('sheet-status').textContent = '';
     document.getElementById('resultado').style.display = 'block';
 
+    const registro = { id: Date.now(), tipo, patente: patente || '—', entrada, salida, facturadas, tarifa, monto };
+
     const lista = cargar();
-    lista.unshift({ id: Date.now(), tipo, patente: patente || '—', entrada, salida, facturadas, tarifa, monto });
+    lista.unshift(registro);
     guardar(lista);
     renderHistorial();
+
+    await enviarASheets(registro);
   }
 
   /* ── Eliminar ── */
