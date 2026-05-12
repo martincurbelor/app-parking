@@ -418,7 +418,11 @@
         tarifa:     registro.tarifa,
         monto:      registro.monto
       });
-      await fetch(SHEET_URL + '?' + params.toString(), { mode: 'no-cors' });
+      await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = img.onerror = resolve;
+        img.src = SHEET_URL + '?' + params.toString();
+      });
       status.style.color = 'var(--success)';
       status.textContent = '✓ Guardado en Google Sheets';
     } catch {
