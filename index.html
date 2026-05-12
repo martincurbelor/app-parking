@@ -12,9 +12,7 @@
       --magenta:  #C4006A;
       --magenta2: #9A0055;
       --navy:     #1A2B6B;
-      --navy2:    #111E50;
       --bg:       #F0F0F0;
-      --bg2:      #E6E6E6;
       --surface:  #FFFFFF;
       --border:   rgba(0,0,0,0.09);
       --muted:    rgba(0,0,0,0.42);
@@ -34,13 +32,11 @@
       min-height: 100vh;
     }
 
-    /* ── Top bar bicolor ── */
     .top-bar {
       height: 4px;
       background: linear-gradient(90deg, var(--magenta) 50%, var(--navy) 50%);
     }
 
-    /* ── Header ── */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -49,9 +45,6 @@
       align-items: center;
       justify-content: space-between;
       height: 64px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
       box-shadow: 0 1px 6px rgba(0,0,0,0.06);
     }
     .logo-area { display: flex; align-items: center; gap: 14px; }
@@ -71,58 +64,90 @@
       font-weight: 700;
       font-size: 1.05rem;
       color: var(--navy);
-      letter-spacing: .3px;
     }
     .htext p { font-size: .78rem; color: var(--muted); margin-top: 1px; }
     .hdate { font-size: .82rem; color: var(--muted); text-align: right; }
     .hdate strong { color: var(--navy); font-weight: 600; }
 
-    /* ── Main layout ── */
-    main { padding: 24px 28px 56px; max-width: 1100px; margin: 0 auto; }
-
-    .page-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--navy);
-      letter-spacing: .4px;
-      margin-bottom: 20px;
+    main {
+      display: flex;
+      justify-content: center;
+      padding: 36px 16px 56px;
     }
-    .page-title span { color: var(--magenta); }
 
-    /* ── Cards ── */
-    .grid-top {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
-    @media (max-width: 780px) { .grid-top { grid-template-columns: 1fr; } }
-
-    .card {
+    .panel {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px 22px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      border-radius: 12px;
+      padding: 28px 32px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
-    .card-title {
+
+    .panel-title {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--navy);
-      letter-spacing: .3px;
-      margin-bottom: 16px;
       text-transform: uppercase;
+      letter-spacing: .4px;
       border-bottom: 2px solid var(--magenta);
-      padding-bottom: 8px;
+      padding-bottom: 10px;
+      margin-bottom: 22px;
       display: inline-block;
     }
 
-    /* ── Form elements ── */
+    /* Precios fijos */
+    .precios {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .precio-item {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .precio-item .pv {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--navy);
+    }
+    .precio-item .pl {
+      font-size: .72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .3px;
+      margin-top: 2px;
+    }
+    .precio-nota {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    /* Instrucciones */
+    .instrucciones {
+      background: rgba(26,43,107,.05);
+      border-left: 3px solid var(--navy);
+      border-radius: 0 6px 6px 0;
+      padding: 10px 14px;
+      margin-bottom: 22px;
+      font-size: .82rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .instrucciones strong { color: var(--navy); }
+
+    /* Form */
     label {
       display: block;
-      font-size: .8rem;
+      font-size: .78rem;
       font-weight: 600;
       color: var(--muted);
       text-transform: uppercase;
@@ -131,14 +156,14 @@
     }
     input, select {
       width: 100%;
-      padding: 9px 12px;
-      border: 1px solid var(--bg2);
+      padding: 10px 12px;
+      border: 1px solid rgba(0,0,0,0.12);
       border-radius: 6px;
-      font-size: .92rem;
+      font-size: .95rem;
       font-family: 'Barlow', sans-serif;
       background: #fafafa;
       color: var(--text);
-      margin-bottom: 13px;
+      margin-bottom: 16px;
       transition: border-color .15s;
     }
     input:focus, select:focus {
@@ -146,127 +171,51 @@
       border-color: var(--magenta);
       box-shadow: 0 0 0 2px rgba(196,0,106,.1);
     }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-    /* ── Buttons ── */
     .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      width: 100%; padding: 11px 16px;
+      width: 100%; padding: 13px;
       border: none; border-radius: 6px;
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1rem; font-weight: 700; letter-spacing: .5px;
-      cursor: pointer; transition: background .15s, transform .1s;
+      font-size: 1.05rem; font-weight: 700; letter-spacing: .5px;
+      cursor: pointer; transition: background .15s;
     }
-    .btn:active { transform: scale(.98); }
     .btn-primary { background: var(--magenta); color: #fff; }
     .btn-primary:hover { background: var(--magenta2); }
-    .btn-navy { background: var(--navy); color: #fff; }
-    .btn-navy:hover { background: var(--navy2); }
-    .btn-ghost {
-      background: none; border: 1px solid var(--border);
-      color: var(--muted); font-size: .85rem;
-      width: auto; padding: 7px 14px;
-    }
-    .btn-ghost:hover { border-color: var(--error); color: var(--error); background: #fef2f2; }
 
-    /* ── Resultado ── */
+    /* Resultado */
     #resultado {
       display: none;
       background: var(--success-bg);
       border: 1px solid var(--success-border);
-      border-radius: 10px;
-      padding: 20px 28px;
-      margin-bottom: 18px;
+      border-radius: 8px;
+      padding: 18px;
+      margin-top: 18px;
       text-align: center;
-      max-width: 1100px;
-      margin-left: auto;
-      margin-right: auto;
+    }
+    #resultado .res-label {
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      color: var(--success);
+      font-weight: 600;
+      margin-bottom: 4px;
     }
     #resultado .res-monto {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 2.2rem; font-weight: 900;
-      color: var(--success); letter-spacing: .5px;
-    }
-    #resultado .res-detail { font-size: .82rem; color: var(--muted); margin-top: 3px; }
-
-    /* ── Stats ── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-    .stat-box {
-      background: var(--bg2);
-      border-radius: 8px;
-      padding: 12px 16px;
-      text-align: center;
-    }
-    .stat-box .sv {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.5rem; font-weight: 900;
-      color: var(--navy);
-    }
-    .stat-box .sl { font-size: .75rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .3px; }
-    .stat-box.highlight .sv { color: var(--magenta); }
-
-    /* ── Historial ── */
-    .hist-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .ticket {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-bottom: 8px;
-      background: #fafafa;
-      transition: box-shadow .15s;
-    }
-    .ticket:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-
-    .ticket-badge {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: .75rem; font-weight: 700;
-      padding: 3px 9px; border-radius: 99px;
-      text-transform: uppercase; letter-spacing: .4px; white-space: nowrap;
-    }
-    .badge-auto { background: rgba(26,43,107,.1); color: var(--navy); }
-    .badge-cam  { background: rgba(196,0,106,.1); color: var(--magenta); }
-    .badge-bici { background: rgba(5,122,85,.12); color: var(--success); }
-
-    .ticket-info { flex: 1; min-width: 0; }
-    .ticket-info strong {
-      display: block; font-size: .9rem; font-weight: 600;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .ticket-info span { font-size: .78rem; color: var(--muted); }
-
-    .ticket-monto {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.15rem; font-weight: 900;
-      color: var(--success); white-space: nowrap;
-    }
-
-    .del-btn {
-      background: none; border: none; cursor: pointer;
-      color: var(--muted); font-size: 1rem;
-      padding: 4px 7px; border-radius: 4px;
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: var(--success);
       line-height: 1;
     }
-    .del-btn:hover { background: #fee2e2; color: var(--error); }
-
-    .empty { color: var(--muted); font-size: .88rem; text-align: center; padding: 24px 0; }
-
-    /* ── Tarifas ── */
-    .tarifa-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
-
-    /* ── Scrollable historial ── */
-    .hist-scroll { max-height: 420px; overflow-y: auto; padding-right: 2px; }
-    .hist-scroll::-webkit-scrollbar { width: 5px; }
-    .hist-scroll::-webkit-scrollbar-thumb { background: var(--bg2); border-radius: 99px; }
+    #resultado .res-detail {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    #sheet-status {
+      font-size: .75rem;
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
@@ -286,107 +235,68 @@
 </header>
 
 <main>
-  <div class="page-title">Control de <span>Estadías</span></div>
+  <div class="panel">
+    <div class="panel-title">Registrar estadía</div>
 
-  <div class="grid-top">
+    <!-- Precios fijos -->
+    <div class="precios">
+      <div class="precio-item">
+        <div class="pv">$500</div>
+        <div class="pl">Auto / hora</div>
+      </div>
+      <div class="precio-item">
+        <div class="pv">$700</div>
+        <div class="pl">Camioneta / hora</div>
+      </div>
+      <div class="precio-item">
+        <div class="pv">$200</div>
+        <div class="pl">Bici / hora</div>
+      </div>
+    </div>
+    <p class="precio-nota">Se cobra por hora o fracción iniciada.</p>
+
+    <!-- Instrucciones -->
+    <div class="instrucciones">
+      <strong>Cómo usar:</strong><br>
+      1. Seleccioná el tipo de vehículo.<br>
+      2. Ingresá la patente o identificación.<br>
+      3. Seleccioná la fecha y hora de ingreso y salida.<br>
+      4. Presioná <strong>Calcular y guardar</strong> para obtener el monto a cobrar.
+    </div>
 
     <!-- Formulario -->
-    <div class="card">
-      <div class="card-title">Registrar estadía</div>
+    <label>Tipo de vehículo</label>
+    <select id="tipo">
+      <option value="Auto">Auto</option>
+      <option value="Camioneta">Camioneta</option>
+      <option value="Bici">Bici</option>
+    </select>
 
-      <label>Tipo de vehículo</label>
-      <select id="tipo">
-        <option value="Auto">Auto</option>
-        <option value="Camioneta">Camioneta</option>
-        <option value="Bici">Bici</option>
-      </select>
+    <label>Patente / Identificación</label>
+    <input type="text" id="patente" placeholder="Ej: ABC 123" maxlength="20" />
 
-      <label>Patente / Identificación</label>
-      <input type="text" id="patente" placeholder="Ej: ABC 123" maxlength="20" />
+    <label>Ingreso</label>
+    <input type="datetime-local" id="entrada" />
 
-      <label>Ingreso</label>
-      <input type="datetime-local" id="entrada" />
+    <label>Salida</label>
+    <input type="datetime-local" id="salida" />
 
-      <label>Salida</label>
-      <input type="datetime-local" id="salida" />
+    <button class="btn btn-primary" onclick="calcular()">Calcular y guardar</button>
 
-      <button class="btn btn-primary" id="btn-guardar" onclick="calcular()">Calcular y guardar</button>
-    </div>
-
-    <!-- Tarifas + stats -->
-    <div>
-      <div class="card" style="margin-bottom:14px">
-        <div class="card-title">Tarifas por hora</div>
-        <div class="tarifa-section">
-          <div>
-            <label>Auto ($)</label>
-            <input type="number" id="tarifa-auto" min="0" step="1" value="500" />
-          </div>
-          <div>
-            <label>Camioneta ($)</label>
-            <input type="number" id="tarifa-cam" min="0" step="1" value="700" />
-          </div>
-          <div>
-            <label>Bici ($)</label>
-            <input type="number" id="tarifa-bici" min="0" step="1" value="200" />
-          </div>
-        </div>
-        <p style="font-size:.78rem;color:var(--muted)">Se cobra por hora o fracción iniciada.</p>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Resumen del día</div>
-        <div class="stats-row">
-          <div class="stat-box highlight">
-            <div class="sv" id="stat-total">$0</div>
-            <div class="sl">Total recaudado</div>
-          </div>
-          <div class="stat-box">
-            <div class="sv" id="stat-autos">0</div>
-            <div class="sl">Autos</div>
-          </div>
-          <div class="stat-box">
-            <div class="sv" id="stat-cams">0</div>
-            <div class="sl">Camionetas</div>
-          </div>
-          <div class="stat-box">
-            <div class="sv" id="stat-bicis">0</div>
-            <div class="sl">Bicis</div>
-          </div>
-        </div>
-      </div>
+    <div id="resultado">
+      <div class="res-label">Total a cobrar</div>
+      <div class="res-monto" id="res-monto"></div>
+      <div class="res-detail" id="res-detail"></div>
+      <div id="sheet-status"></div>
     </div>
   </div>
-
-  <!-- Resultado full-width -->
-  <div id="resultado">
-    <div class="res-monto" id="res-monto"></div>
-    <div class="res-detail" id="res-detail"></div>
-    <div id="sheet-status" style="font-size:.78rem;margin-top:6px;"></div>
-  </div>
-
-  <!-- Historial -->
-  <div class="card">
-    <div class="hist-header">
-      <div class="card-title" style="margin-bottom:0">Historial de estadías</div>
-      <button class="btn btn-ghost" onclick="borrarTodo()">Borrar todo</button>
-    </div>
-    <div class="hist-scroll" id="hist-lista"></div>
-  </div>
-
 </main>
 
 <script>
-  const KEY = 'axion_parking_v1';
+  // ── Tarifas fijas (solo modificables en el código) ──
+  const TARIFAS = { Auto: 500, Camioneta: 700, Bici: 200 };
 
-  // ── Pegá aquí la URL de tu Apps Script después de publicarlo ──
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwvvL-lXFqLJidD8peumF2WGRPhAf1EwTXoN61CgQ2jkEl-08yaz1V_qNYW7dGKBqiziw/exec';
-
-  /* ── Utilidades ── */
-  function cargar() {
-    try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; }
-  }
-  function guardar(lista) { localStorage.setItem(KEY, JSON.stringify(lista)); }
 
   function horasFraccion(entrada, salida) {
     const diff = (new Date(salida) - new Date(entrada)) / 36e5;
@@ -407,7 +317,6 @@
 
   function moneda(n) { return '$' + n.toLocaleString('es-AR'); }
 
-  /* ── Fecha en header ── */
   function renderFecha() {
     const d = new Date();
     const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -415,12 +324,11 @@
       `<strong>${dias[d.getDay()]}</strong>, ${d.toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' })}`;
   }
 
-  /* ── Enviar a Google Sheets ── */
   async function enviarASheets(registro) {
     if (!SHEET_URL) return;
     const status = document.getElementById('sheet-status');
     status.style.color = 'var(--muted)';
-    status.textContent = '⏳ Guardando en Google Sheets...';
+    status.textContent = '⏳ Guardando...';
     try {
       const params = new URLSearchParams({
         tipo:       registro.tipo,
@@ -437,29 +345,25 @@
         img.src = SHEET_URL + '?' + params.toString();
       });
       status.style.color = 'var(--success)';
-      status.textContent = '✓ Guardado en Google Sheets';
+      status.textContent = '✓ Registro guardado';
     } catch {
       status.style.color = 'var(--error)';
-      status.textContent = '⚠ No se pudo guardar en Sheets (registro local guardado)';
+      status.textContent = '⚠ No se pudo guardar el registro';
     }
   }
 
-  /* ── Calcular ── */
   async function calcular() {
     const tipo    = document.getElementById('tipo').value;
     const patente = document.getElementById('patente').value.trim().toUpperCase();
     const entrada = document.getElementById('entrada').value;
     const salida  = document.getElementById('salida').value;
-    const tAuto   = parseFloat(document.getElementById('tarifa-auto').value) || 0;
-    const tCam    = parseFloat(document.getElementById('tarifa-cam').value) || 0;
-    const tBici   = parseFloat(document.getElementById('tarifa-bici').value) || 0;
 
     if (!entrada || !salida) { alert('Completá la fecha de ingreso y salida.'); return; }
 
     const { decimal, facturadas } = horasFraccion(entrada, salida);
     if (decimal <= 0) { alert('La salida debe ser posterior al ingreso.'); return; }
 
-    const tarifa = tipo === 'Auto' ? tAuto : tipo === 'Camioneta' ? tCam : tBici;
+    const tarifa = TARIFAS[tipo];
     const monto  = facturadas * tarifa;
 
     document.getElementById('res-monto').textContent = moneda(monto);
@@ -469,60 +373,11 @@
     document.getElementById('sheet-status').textContent = '';
     document.getElementById('resultado').style.display = 'block';
 
-    const registro = { id: Date.now(), tipo, patente: patente || '—', entrada, salida, facturadas, tarifa, monto };
-
-    const lista = cargar();
-    lista.unshift(registro);
-    guardar(lista);
-    renderHistorial();
-
-    await enviarASheets(registro);
+    await enviarASheets({ tipo, patente: patente || '—', entrada, salida, facturadas, tarifa, monto });
   }
 
-  /* ── Eliminar ── */
-  function eliminar(id) {
-    guardar(cargar().filter(r => r.id !== id));
-    renderHistorial();
-  }
-
-  function borrarTodo() {
-    if (!confirm('¿Borrar todo el historial? Esta acción no se puede deshacer.')) return;
-    localStorage.removeItem(KEY);
-    renderHistorial();
-  }
-
-  /* ── Render historial ── */
-  function renderHistorial() {
-    const lista = cargar();
-    const cont  = document.getElementById('hist-lista');
-
-    if (lista.length === 0) {
-      cont.innerHTML = '<p class="empty">Sin registros aún.</p>';
-    } else {
-      cont.innerHTML = lista.map(r => `
-        <div class="ticket">
-          <span class="ticket-badge ${r.tipo === 'Auto' ? 'badge-auto' : r.tipo === 'Camioneta' ? 'badge-cam' : 'badge-bici'}">${r.tipo}</span>
-          <div class="ticket-info">
-            <strong>${r.patente}</strong>
-            <span>${fmt(r.entrada)} → ${fmt(r.salida)} &nbsp;|&nbsp; ${r.facturadas}h × ${moneda(r.tarifa)}/h</span>
-          </div>
-          <div class="ticket-monto">${moneda(r.monto)}</div>
-          <button class="del-btn" title="Eliminar" onclick="eliminar(${r.id})">✕</button>
-        </div>
-      `).join('');
-    }
-
-    const total = lista.reduce((s, r) => s + r.monto, 0);
-    document.getElementById('stat-total').textContent = moneda(total);
-    document.getElementById('stat-autos').textContent = lista.filter(r => r.tipo === 'Auto').length;
-    document.getElementById('stat-cams').textContent  = lista.filter(r => r.tipo === 'Camioneta').length;
-    document.getElementById('stat-bicis').textContent = lista.filter(r => r.tipo === 'Bici').length;
-  }
-
-  /* ── Init ── */
   renderFecha();
   document.getElementById('entrada').value = ahoraLocal();
-  renderHistorial();
 </script>
 
 </body>
