@@ -439,24 +439,29 @@
     return `${mm}min`;
   }
 
+  function ceilingTier(h) {
+    if (h <= 1)   return 1;
+    if (h <= 1.5) return 1.5;
+    if (h <= 2)   return 2;
+    if (h <= 2.5) return 2.5;
+    if (h <= 3)   return 3;
+    return h; // zona flat, se usa el tiempo real
+  }
+
   function descripcionCobro(tipo, horasTotal) {
     if (tipo === 'Bici') {
       return `cobro de ${Math.ceil(horasTotal)}h`;
     }
     if (tipo === 'Auto') {
-      const tramos = [];
+      let totalBill = 0;
       let restante = horasTotal;
-      let dia = 1;
       while (restante > 0) {
         const enEsteDia = Math.min(restante, 24);
-        const p1 = Math.min(enEsteDia, 12);
-        const label = horasTotal > 24 ? `Día ${dia} ` : '';
-        tramos.push(`${label}tramo 1: ${fmtHM(p1)}`);
-        if (enEsteDia > 12) tramos.push(`${label}tramo 2: ${fmtHM(enEsteDia - 12)}`);
+        totalBill += ceilingTier(Math.min(enEsteDia, 12));
+        if (enEsteDia > 12) totalBill += ceilingTier(enEsteDia - 12);
         restante -= enEsteDia;
-        dia++;
       }
-      return `cobro de ${tramos.join(' + ')}`;
+      return `cobro de ${fmtHM(totalBill)}`;
     }
     return '';
   }
