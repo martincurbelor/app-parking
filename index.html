@@ -174,10 +174,13 @@
       display: none;
       background: var(--success-bg);
       border: 1px solid var(--success-border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      margin-top: 14px;
+      border-radius: 10px;
+      padding: 20px 28px;
+      margin-bottom: 18px;
       text-align: center;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
     }
     #resultado .res-monto {
       font-family: 'Barlow Condensed', sans-serif;
@@ -189,7 +192,7 @@
     /* ── Stats ── */
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
       margin-bottom: 14px;
     }
@@ -232,6 +235,7 @@
     }
     .badge-auto { background: rgba(26,43,107,.1); color: var(--navy); }
     .badge-cam  { background: rgba(196,0,106,.1); color: var(--magenta); }
+    .badge-bici { background: rgba(5,122,85,.12); color: var(--success); }
 
     .ticket-info { flex: 1; min-width: 0; }
     .ticket-info strong {
@@ -257,8 +261,7 @@
     .empty { color: var(--muted); font-size: .88rem; text-align: center; padding: 24px 0; }
 
     /* ── Tarifas ── */
-    .tarifa-section { display: flex; gap: 12px; margin-bottom: 14px; }
-    .tarifa-section > div { flex: 1; }
+    .tarifa-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
 
     /* ── Scrollable historial ── */
     .hist-scroll { max-height: 420px; overflow-y: auto; padding-right: 2px; }
@@ -295,6 +298,7 @@
       <select id="tipo">
         <option value="Auto">Auto</option>
         <option value="Camioneta">Camioneta</option>
+        <option value="Bici">Bici</option>
       </select>
 
       <label>Patente / Identificación</label>
@@ -307,12 +311,6 @@
       <input type="datetime-local" id="salida" />
 
       <button class="btn btn-primary" id="btn-guardar" onclick="calcular()">Calcular y guardar</button>
-
-      <div id="resultado">
-        <div class="res-monto" id="res-monto"></div>
-        <div class="res-detail" id="res-detail"></div>
-        <div id="sheet-status" style="font-size:.78rem;margin-top:6px;"></div>
-      </div>
     </div>
 
     <!-- Tarifas + stats -->
@@ -327,6 +325,10 @@
           <div>
             <label>Camioneta ($)</label>
             <input type="number" id="tarifa-cam" min="0" step="1" value="700" />
+          </div>
+          <div>
+            <label>Bici ($)</label>
+            <input type="number" id="tarifa-bici" min="0" step="1" value="200" />
           </div>
         </div>
         <p style="font-size:.78rem;color:var(--muted)">Se cobra por hora o fracción iniciada.</p>
@@ -347,9 +349,20 @@
             <div class="sv" id="stat-cams">0</div>
             <div class="sl">Camionetas</div>
           </div>
+          <div class="stat-box">
+            <div class="sv" id="stat-bicis">0</div>
+            <div class="sl">Bicis</div>
+          </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Resultado full-width -->
+  <div id="resultado">
+    <div class="res-monto" id="res-monto"></div>
+    <div class="res-detail" id="res-detail"></div>
+    <div id="sheet-status" style="font-size:.78rem;margin-top:6px;"></div>
   </div>
 
   <!-- Historial -->
@@ -439,13 +452,14 @@
     const salida  = document.getElementById('salida').value;
     const tAuto   = parseFloat(document.getElementById('tarifa-auto').value) || 0;
     const tCam    = parseFloat(document.getElementById('tarifa-cam').value) || 0;
+    const tBici   = parseFloat(document.getElementById('tarifa-bici').value) || 0;
 
     if (!entrada || !salida) { alert('Completá la fecha de ingreso y salida.'); return; }
 
     const { decimal, facturadas } = horasFraccion(entrada, salida);
     if (decimal <= 0) { alert('La salida debe ser posterior al ingreso.'); return; }
 
-    const tarifa = tipo === 'Auto' ? tAuto : tCam;
+    const tarifa = tipo === 'Auto' ? tAuto : tipo === 'Camioneta' ? tCam : tBici;
     const monto  = facturadas * tarifa;
 
     document.getElementById('res-monto').textContent = moneda(monto);
@@ -487,7 +501,7 @@
     } else {
       cont.innerHTML = lista.map(r => `
         <div class="ticket">
-          <span class="ticket-badge ${r.tipo === 'Auto' ? 'badge-auto' : 'badge-cam'}">${r.tipo}</span>
+          <span class="ticket-badge ${r.tipo === 'Auto' ? 'badge-auto' : r.tipo === 'Camioneta' ? 'badge-cam' : 'badge-bici'}">${r.tipo}</span>
           <div class="ticket-info">
             <strong>${r.patente}</strong>
             <span>${fmt(r.entrada)} → ${fmt(r.salida)} &nbsp;|&nbsp; ${r.facturadas}h × ${moneda(r.tarifa)}/h</span>
@@ -502,6 +516,7 @@
     document.getElementById('stat-total').textContent = moneda(total);
     document.getElementById('stat-autos').textContent = lista.filter(r => r.tipo === 'Auto').length;
     document.getElementById('stat-cams').textContent  = lista.filter(r => r.tipo === 'Camioneta').length;
+    document.getElementById('stat-bicis').textContent = lista.filter(r => r.tipo === 'Bici').length;
   }
 
   /* ── Init ── */
