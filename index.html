@@ -7,6 +7,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    // Fijar tema antes del primer paint (evita flicker)
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
   <style>
     :root {
       --magenta:  #C4006A;
@@ -21,6 +31,31 @@
       --success-bg: #ecfdf5;
       --success-border: #6ee7b7;
       --error:    #b91c1c;
+      --input-bg:     #fafafa;
+      --input-border: rgba(0,0,0,0.12);
+      --highlight-cap: rgba(196,0,106,.06);
+      --highlight-max: rgba(26,43,107,.08);
+      --shadow-card:  0 2px 10px rgba(0,0,0,0.05);
+      --shadow-header: 0 1px 6px rgba(0,0,0,0.06);
+    }
+
+    [data-theme="dark"] {
+      --navy:     #818CF8;
+      --bg:       #0F111A;
+      --surface:  #1A1D2A;
+      --border:   rgba(255,255,255,0.08);
+      --muted:    rgba(255,255,255,0.5);
+      --text:     #E8E8F0;
+      --success:  #34d399;
+      --success-bg: rgba(52,211,153,0.08);
+      --success-border: rgba(52,211,153,0.35);
+      --error:    #ef4444;
+      --input-bg:     #252836;
+      --input-border: rgba(255,255,255,0.12);
+      --highlight-cap: rgba(196,0,106,.18);
+      --highlight-max: rgba(129,140,248,.15);
+      --shadow-card:  0 2px 10px rgba(0,0,0,0.4);
+      --shadow-header: 0 1px 6px rgba(0,0,0,0.5);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,9 +80,27 @@
       align-items: center;
       justify-content: space-between;
       height: 64px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+      box-shadow: var(--shadow-header);
     }
     .logo-area { display: flex; align-items: center; gap: 14px; }
+    .hright { display: flex; align-items: center; gap: 16px; }
+    .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, border-color .15s, transform .1s;
+      color: var(--text);
+      line-height: 1;
+    }
+    .theme-toggle:hover { background: var(--bg); border-color: var(--magenta); }
+    .theme-toggle:active { transform: scale(.95); }
     .logo-pill {
       background: var(--magenta);
       color: #fff;
@@ -91,7 +144,7 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 28px 32px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: var(--shadow-card);
     }
 
     .card-title {
@@ -120,11 +173,11 @@
     input, select {
       width: 100%;
       padding: 10px 12px;
-      border: 1px solid rgba(0,0,0,0.12);
+      border: 1px solid var(--input-border);
       border-radius: 6px;
       font-size: .95rem;
       font-family: 'Barlow', sans-serif;
-      background: #fafafa;
+      background: var(--input-bg);
       color: var(--text);
       margin-bottom: 16px;
       transition: border-color .15s;
@@ -170,9 +223,9 @@
     }
     .tt-row:nth-child(odd) { background: var(--bg); }
     .tt-row span:last-child { font-weight: 600; color: var(--navy); }
-    .tt-cap { background: rgba(196,0,106,.06) !important; }
+    .tt-cap { background: var(--highlight-cap) !important; }
     .tt-cap span:last-child { color: var(--magenta); }
-    .tt-max { background: rgba(26,43,107,.08) !important; font-weight: 600; }
+    .tt-max { background: var(--highlight-max) !important; font-weight: 600; }
     .tt-max span:last-child { color: var(--navy); }
 
     /* Tabla de tarifas comparativa (Auto + Camioneta) */
@@ -200,9 +253,9 @@
     .tarifa-tabla-comp td + td { text-align: right; }
     .tarifa-tabla-comp td + td { font-weight: 600; color: var(--navy); }
     .tarifa-tabla-comp tbody tr:nth-child(odd) { background: var(--bg); }
-    .tarifa-tabla-comp tr.ttc-cap { background: rgba(196,0,106,.06) !important; }
+    .tarifa-tabla-comp tr.ttc-cap { background: var(--highlight-cap) !important; }
     .tarifa-tabla-comp tr.ttc-cap td + td { color: var(--magenta); }
-    .tarifa-tabla-comp tr.ttc-max { background: rgba(26,43,107,.08) !important; }
+    .tarifa-tabla-comp tr.ttc-max { background: var(--highlight-max) !important; }
     .tarifa-tabla-comp tr.ttc-max td { font-weight: 700; }
     .tarifa-tabla-comp tr.ttc-max td + td { color: var(--navy); }
 
@@ -265,6 +318,33 @@
       font-size: 1rem;
       margin-top: 12px;
     }
+
+    /* Aviso de tarifa mensual */
+    #resultado.warning {
+      background: #fff7ed;
+      border-color: #fdba74;
+      box-shadow: 0 2px 10px rgba(234,88,12,.1);
+    }
+    [data-theme="dark"] #resultado.warning {
+      background: rgba(234,88,12,.12);
+      border-color: rgba(253,186,116,.4);
+    }
+    #resultado.warning .res-label,
+    #resultado.warning .res-monto { color: #c2410c; }
+    [data-theme="dark"] #resultado.warning .res-label,
+    [data-theme="dark"] #resultado.warning .res-monto { color: #fdba74; }
+    #resultado.warning .res-monto {
+      font-size: 2.6rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      line-height: 1.1;
+    }
+    .warn-tarifas {
+      margin-top: 14px;
+      font-size: 1.05rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .warn-tarifas strong { color: var(--navy); }
   </style>
 </head>
 <body>
@@ -280,7 +360,10 @@
       <p>Estación de Servicio</p>
     </div>
   </div>
-  <div class="hdate" id="hdate"></div>
+  <div class="hright">
+    <div class="hdate" id="hdate"></div>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Cambiar tema">🌙</button>
+  </div>
 </header>
 
 <main>
@@ -354,9 +437,10 @@
 
   <!-- Columna derecha: resultado -->
   <div id="resultado">
-    <div class="res-label">Total a cobrar</div>
+    <div class="res-label" id="res-label">Total a cobrar</div>
     <div class="res-monto" id="res-monto"></div>
     <div class="res-detail" id="res-detail"></div>
+    <div class="warn-tarifas" id="warn-tarifas"></div>
     <div id="sheet-status"></div>
   </div>
 </main>
@@ -512,6 +596,10 @@
     return '';
   }
 
+  const HORAS_MES = 24 * 30; // umbral: 30 días
+
+  function diasEnteros(horas) { return Math.floor(horas / 24); }
+
   async function calcular() {
     const tipo    = document.getElementById('tipo').value;
     const patente = document.getElementById('patente').value.trim().toUpperCase();
@@ -523,8 +611,6 @@
     const { decimal, facturadas } = horasFraccion(entrada, salida);
     if (decimal <= 0) { alert('La salida debe ser posterior al ingreso.'); return; }
 
-    const monto = calcularMonto(tipo, decimal);
-
     const totalMin = Math.floor(decimal * 60);
     const dias  = Math.floor(totalMin / 1440);
     const horas = Math.floor((totalMin % 1440) / 60);
@@ -535,18 +621,61 @@
     if (mins  > 0) partes.push(`${mins}min`);
     const hDisplay = partes.length > 0 ? partes.join(' ') : '0min';
 
+    const resEl    = document.getElementById('resultado');
+    const labelEl  = document.getElementById('res-label');
+    const montoEl  = document.getElementById('res-monto');
+    const detailEl = document.getElementById('res-detail');
+    const warnEl   = document.getElementById('warn-tarifas');
+    const statusEl = document.getElementById('sheet-status');
+
+    statusEl.textContent = '';
+
+    if (decimal > HORAS_MES) {
+      resEl.classList.add('warning');
+      labelEl.textContent = '⚠ Tarifa mensual';
+      montoEl.textContent = 'Cobrar mensualidad';
+      detailEl.textContent =
+        `${hDisplay} de estadía` + (patente ? ` — ${patente}` : '');
+      warnEl.innerHTML =
+        'Esta estadía supera <strong>1 mes</strong>. ' +
+        'Cobrá la <strong>tarifa mensual</strong> (no se calcula en esta app):<br>' +
+        '🚗 Auto $4.400 · 🚙 Camioneta $4.700 · 🚲 Bici $500';
+      resEl.classList.add('visible');
+      resetForm();
+      return;
+    }
+
+    resEl.classList.remove('warning');
+    labelEl.textContent = 'Total a cobrar';
+    warnEl.innerHTML = '';
+
+    const monto = calcularMonto(tipo, decimal);
     const cobro = descripcionCobro(tipo, decimal);
 
-    document.getElementById('res-monto').textContent = moneda(monto);
-    document.getElementById('res-detail').textContent =
+    montoEl.textContent = moneda(monto);
+    detailEl.textContent =
       `${hDisplay} de estadía · ${cobro}` + (patente ? ` — ${patente}` : '');
-    document.getElementById('sheet-status').textContent = '';
-    document.getElementById('resultado').classList.add('visible');
+    resEl.classList.add('visible');
 
     resetForm();
 
     await enviarASheets({ tipo, patente: patente || '—', entrada, salida, facturadas: decimal.toFixed(2), tarifa: '-', monto });
   }
+
+  /* ── Dark mode ── */
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    try { localStorage.setItem('theme', theme); } catch {}
+    const btn = document.getElementById('theme-toggle');
+    if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+  }
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  }
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  // Sincroniza el ícono del botón al cargar (el tema ya quedó fijado por el script inline del <head>)
+  setTheme(document.documentElement.getAttribute('data-theme') || 'light');
 
   renderFecha();
 </script>
