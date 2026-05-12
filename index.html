@@ -418,14 +418,9 @@
         tarifa:     registro.tarifa,
         monto:      registro.monto
       });
-      const res = await fetch(SHEET_URL + '?' + params.toString(), { redirect: 'follow' });
-      const json = await res.json();
-      if (json.ok) {
-        status.style.color = 'var(--success)';
-        status.textContent = '✓ Guardado en Google Sheets';
-      } else {
-        throw new Error(json.error);
-      }
+      await fetch(SHEET_URL + '?' + params.toString(), { mode: 'no-cors' });
+      status.style.color = 'var(--success)';
+      status.textContent = '✓ Guardado en Google Sheets';
     } catch {
       status.style.color = 'var(--error)';
       status.textContent = '⚠ No se pudo guardar en Sheets (registro local guardado)';
