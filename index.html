@@ -405,6 +405,12 @@
     [data-theme="dark"] .flatpickr-day.prevMonthDay,
     [data-theme="dark"] .flatpickr-day.nextMonthDay { color: var(--muted); }
     [data-theme="dark"] .flatpickr-day:hover { background: rgba(255,255,255,.08); }
+    /* Campo de hora/minuto: gris oscuro legible (en vez del blanco al enfocar) */
+    [data-theme="dark"] .flatpickr-time input { background: #3a4055; color: var(--text); }
+    [data-theme="dark"] .flatpickr-time input:hover,
+    [data-theme="dark"] .flatpickr-time input:focus { background: #4a5168; }
+    [data-theme="dark"] .flatpickr-time input::selection { background: var(--magenta); color: #fff; }
+    [data-theme="dark"] .flatpickr-time .numInputWrapper:hover { background: transparent; }
     [data-theme="dark"] .flatpickr-time .numInputWrapper span.arrowUp,
     [data-theme="dark"] .flatpickr-time .numInputWrapper span.arrowDown { background: rgba(255,255,255,.06); }
     [data-theme="dark"] .flatpickr-months .flatpickr-prev-month svg,
