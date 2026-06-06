@@ -314,6 +314,13 @@
       margin-top: 18px;
       line-height: 1.4;
     }
+    #resultado .res-fechas {
+      font-size: 1.05rem;
+      color: var(--muted);
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    #resultado .res-fechas strong { color: var(--text); font-weight: 600; }
     #sheet-status {
       font-size: 1rem;
       margin-top: 12px;
@@ -440,6 +447,7 @@
     <div class="res-label" id="res-label">Total a cobrar</div>
     <div class="res-monto" id="res-monto"></div>
     <div class="res-detail" id="res-detail"></div>
+    <div class="res-fechas" id="res-fechas"></div>
     <div class="warn-tarifas" id="warn-tarifas"></div>
     <div id="sheet-status"></div>
   </div>
@@ -664,6 +672,7 @@
     const labelEl  = document.getElementById('res-label');
     const montoEl  = document.getElementById('res-monto');
     const detailEl = document.getElementById('res-detail');
+    const fechasEl = document.getElementById('res-fechas');
     const warnEl   = document.getElementById('warn-tarifas');
     const statusEl = document.getElementById('sheet-status');
 
@@ -679,6 +688,9 @@
     montoEl.textContent = moneda(monto);
     detailEl.textContent =
       `${hDisplay} de estadía · Tarifa: ${tarifa}` + (patente ? ` — ${patente}` : '');
+    fechasEl.innerHTML =
+      `${tipo}${patente ? ` (${patente})` : ''}<br>` +
+      `<strong>Ingreso:</strong> ${fmt(entrada)} &nbsp;→&nbsp; <strong>Salida:</strong> ${fmt(salida)}`;
     resEl.classList.add('visible');
 
     resetForm();
