@@ -470,31 +470,111 @@
     return 395;
   }
 
-  // Lógica:
-  //  · Cada 24h completas = 1 día (precio propio).
-  //  · El resto: hasta 3h tramos, hasta 12h = 1 piso, pasadas 12h = se cobra el día.
-  function calcularMontoVehiculo(horas, tiered, pisoPrecio, diaPrecio) {
-    if (horas <= 0) return 0;
-    const diasCompletos = Math.floor(horas / 24);
-    const resto = horas - diasCompletos * 24;
-    let monto = diasCompletos * diaPrecio;
-    if (resto > 0) {
-      if      (resto <= 3)  monto += tiered(resto);
-      else if (resto <= 12) monto += pisoPrecio;
-      else                  monto += diaPrecio;
+  // ── Niveles con tope ──
+  // Se va sumando la fracción menor (hora → día) pero el cobro NUNCA supera el
+  // nivel siguiente. Al alcanzar un nivel, ese precio queda fijo y se vuelve a
+  // sumar desde cero hacia el nivel siguiente. Ciclo completo:
+  //   hora → piso (medio día) → día → semana → 2 semanas → mes,
+  // y al pasar el mes el ciclo se reinicia (mes + nuevo ciclo).
+  const TARIFAS = {
+    Auto:      { tiered: tieredAuto,      piso: 350, dia: 600, semana: 2800, dosSemanas: 4200, mes: 4400 },
+    Camioneta: { tiered: tieredCamioneta, piso: 395, dia: 700, semana: 2800, dosSemanas: 4200, mes: 4700 },
+  };
+
+  const H_SEMANA = 7 * 24, H_2SEMANAS = 14 * 24, H_MES = 30 * 24;
+
+  // Horas sueltas dentro de un día (resto < 24h)
+  function montoFraccionDia(horas, cfg) {
+    if (horas <= 0)  return 0;
+    if (horas <= 3)  return cfg.tiered(horas);
+    if (horas <= 12) return cfg.piso;
+    return cfg.dia;
+  }
+
+  // Cobro de una estadía de hasta 1 mes (horas en (0, H_MES])
+  function montoDentroDelMes(horas, cfg) {
+    if (horas <= H_SEMANA) {                     // hasta 1 semana → tope semana
+      const dias = Math.floor(horas / 24);
+      const rem  = horas - dias * 24;
+      return Math.min(dias * cfg.dia + montoFraccionDia(rem, cfg), cfg.semana);
     }
+    if (horas <= H_2SEMANAS) {                   // 1 a 2 semanas → tope 2 semanas
+      const extra = horas - H_SEMANA;
+      const dias  = Math.floor(extra / 24);
+      const rem   = extra - dias * 24;
+      return Math.min(cfg.semana + dias * cfg.dia + montoFraccionDia(rem, cfg), cfg.dosSemanas);
+    }
+    const extra = horas - H_2SEMANAS;            // 2 semanas a 1 mes → tope mes
+    const dias  = Math.floor(extra / 24);
+    const rem   = extra - dias * 24;
+    return Math.min(cfg.dosSemanas + dias * cfg.dia + montoFraccionDia(rem, cfg), cfg.mes);
+  }
+
+  function calcularMontoVehiculo(horas, cfg) {
+    if (horas <= 0) return 0;
+    const meses = Math.floor(horas / H_MES);     // ciclos de mes completos
+    const resto = horas - meses * H_MES;
+    let monto = meses * cfg.mes;
+    if (resto > 0) monto += montoDentroDelMes(resto, cfg);
     return monto;
   }
 
-  function calcularMontoAuto(horas)      { return calcularMontoVehiculo(horas, tieredAuto,      350, 600); }
-  function calcularMontoCamioneta(horas) { return calcularMontoVehiculo(horas, tieredCamioneta, 395, 700); }
-  function calcularMontoBici(horas)      { return Math.ceil(horas) * 13; }
+  // Bici: solo por hora ($13/h), con tope mensual de $500 por ciclo de 30 días
+  function calcularMontoBici(horas) {
+    if (horas <= 0) return 0;
+    const meses = Math.floor(horas / H_MES);
+    const resto = horas - meses * H_MES;
+    let monto = meses * 500;
+    if (resto > 0) monto += Math.min(Math.ceil(resto) * 13, 500);
+    return monto;
+  }
 
   function calcularMonto(tipo, horasDecimal) {
-    if (tipo === 'Auto')      return calcularMontoAuto(horasDecimal);
-    if (tipo === 'Camioneta') return calcularMontoCamioneta(horasDecimal);
-    if (tipo === 'Bici')      return calcularMontoBici(horasDecimal);
-    return 0;
+    if (tipo === 'Bici') return calcularMontoBici(horasDecimal);
+    const cfg = TARIFAS[tipo];
+    return cfg ? calcularMontoVehiculo(horasDecimal, cfg) : 0;
+  }
+
+  // ── Modalidad de tarifa aplicada (nivel más alto que alcanzó el cobro) ──
+  function modalidadFraccion(horas) {
+    if (horas <= 0)  return '—';
+    if (horas <= 3)  return 'Por hora';
+    if (horas <= 12) return 'Piso';
+    return 'Diaria';
+  }
+
+  function topeDentroDelMes(horas, cfg) {
+    if (horas <= H_SEMANA) {
+      const dias = Math.floor(horas / 24);
+      const rem  = horas - dias * 24;
+      if (dias * cfg.dia + montoFraccionDia(rem, cfg) >= cfg.semana) return 'Semana';
+      return dias > 0 ? 'Diaria' : modalidadFraccion(rem);
+    }
+    if (horas <= H_2SEMANAS) {
+      const extra = horas - H_SEMANA;
+      const dias  = Math.floor(extra / 24);
+      const rem   = extra - dias * 24;
+      if (cfg.semana + dias * cfg.dia + montoFraccionDia(rem, cfg) >= cfg.dosSemanas) return '2 Semanas';
+      return 'Semana';
+    }
+    const extra = horas - H_2SEMANAS;
+    const dias  = Math.floor(extra / 24);
+    const rem   = extra - dias * 24;
+    if (cfg.dosSemanas + dias * cfg.dia + montoFraccionDia(rem, cfg) >= cfg.mes) return 'Mes';
+    return '2 Semanas';
+  }
+
+  function tipoTarifa(tipo, horas) {
+    if (horas <= 0)      return '—';
+    if (tipo === 'Bici') return 'Por hora';
+    const cfg = TARIFAS[tipo];
+    if (!cfg) return '—';
+    const meses = Math.floor(horas / H_MES);
+    const resto = horas - meses * H_MES;
+    const partes = [];
+    if (meses > 0) partes.push(meses > 1 ? `${meses} Meses` : 'Mes');
+    if (resto > 0) partes.push(topeDentroDelMes(resto, cfg));
+    return partes.length ? partes.join(' + ') : 'Mes';
   }
 
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwvvL-lXFqLJidD8peumF2WGRPhAf1EwTXoN61CgQ2jkEl-08yaz1V_qNYW7dGKBqiziw/exec';
@@ -559,47 +639,6 @@
     }
   }
 
-  function fmtHM(h) {
-    const hh = Math.floor(h), mm = Math.round((h - hh) * 60);
-    if (hh > 0 && mm > 0) return `${hh}h ${mm}min`;
-    if (hh > 0) return `${hh}h`;
-    return `${mm}min`;
-  }
-
-  function ceilingTier(h) {
-    if (h <= 1)   return 1;
-    if (h <= 1.5) return 1.5;
-    if (h <= 2)   return 2;
-    if (h <= 2.5) return 2.5;
-    if (h <= 3)   return 3;
-    return 12; // zona flat: 1 piso = 12h
-  }
-
-  function descripcionCobro(tipo, horasTotal) {
-    if (tipo === 'Bici') {
-      return `cobro de ${Math.ceil(horasTotal)}h`;
-    }
-    if (tipo === 'Auto' || tipo === 'Camioneta') {
-      let dias = Math.floor(horasTotal / 24);
-      const resto = horasTotal - dias * 24;
-      let horasBilled = 0;
-      if (resto > 0) {
-        if      (resto <= 3)  horasBilled = ceilingTier(resto);
-        else if (resto <= 12) horasBilled = 12;
-        else { dias += 1; horasBilled = 0; }
-      }
-      const partes = [];
-      if (dias > 0)        partes.push(`${dias} día${dias > 1 ? 's' : ''}`);
-      if (horasBilled > 0) partes.push(fmtHM(horasBilled));
-      return partes.length ? `cobro de ${partes.join(' ')}` : '';
-    }
-    return '';
-  }
-
-  const HORAS_MES = 24 * 30; // umbral: 30 días
-
-  function diasEnteros(horas) { return Math.floor(horas / 24); }
-
   async function calcular() {
     const tipo    = document.getElementById('tipo').value;
     const patente = document.getElementById('patente').value.trim().toUpperCase();
@@ -630,36 +669,21 @@
 
     statusEl.textContent = '';
 
-    if (decimal > HORAS_MES) {
-      resEl.classList.add('warning');
-      labelEl.textContent = '⚠ Tarifa mensual';
-      montoEl.textContent = 'Cobrar mensualidad';
-      detailEl.textContent =
-        `${hDisplay} de estadía` + (patente ? ` — ${patente}` : '');
-      warnEl.innerHTML =
-        'Esta estadía supera <strong>1 mes</strong>. ' +
-        'Cobrá la <strong>tarifa mensual</strong> (no se calcula en esta app):<br>' +
-        '🚗 Auto $4.400 · 🚙 Camioneta $4.700 · 🚲 Bici $500';
-      resEl.classList.add('visible');
-      resetForm();
-      return;
-    }
-
     resEl.classList.remove('warning');
     labelEl.textContent = 'Total a cobrar';
     warnEl.innerHTML = '';
 
-    const monto = calcularMonto(tipo, decimal);
-    const cobro = descripcionCobro(tipo, decimal);
+    const monto  = calcularMonto(tipo, decimal);
+    const tarifa = tipoTarifa(tipo, decimal);
 
     montoEl.textContent = moneda(monto);
     detailEl.textContent =
-      `${hDisplay} de estadía · ${cobro}` + (patente ? ` — ${patente}` : '');
+      `${hDisplay} de estadía · Tarifa: ${tarifa}` + (patente ? ` — ${patente}` : '');
     resEl.classList.add('visible');
 
     resetForm();
 
-    await enviarASheets({ tipo, patente: patente || '—', entrada, salida, facturadas: decimal.toFixed(2), tarifa: '-', monto });
+    await enviarASheets({ tipo, patente: patente || '—', entrada, salida, facturadas: decimal.toFixed(2), tarifa, monto });
   }
 
   /* ── Dark mode ── */

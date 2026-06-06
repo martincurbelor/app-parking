@@ -48,7 +48,7 @@ function guardarFila(data) {
     data.entrada,
     data.salida,
     Number(data.facturadas),
-    Number(data.tarifa),
+    data.tarifa,
     Number(data.monto)
   ]);
 }
