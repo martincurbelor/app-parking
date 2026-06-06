@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" />
   <script>
     // Fijar tema antes del primer paint (evita flicker)
     (function () {
@@ -202,7 +203,8 @@
 
     /* ── Columna izquierda ── */
     .right-col { display: flex; flex-direction: column; gap: 16px; }
-    .right-col .card { flex: 1; }
+    .right-col .card { flex: 0 0 auto; }
+    .right-col .card-tarifas { flex: 1 1 auto; }   /* la caja de tarifas se estira para entrar cómoda */
 
     /* Tabla de tarifas */
     .tarifa-bloque { }
@@ -255,6 +257,7 @@
     .tarifa-tabla-comp tbody tr:nth-child(odd) { background: var(--bg); }
     .tarifa-tabla-comp tr.ttc-cap { background: var(--highlight-cap) !important; }
     .tarifa-tabla-comp tr.ttc-cap td + td { color: var(--magenta); }
+    .tarifa-tabla-comp tr.ttc-sep td { border-top: 2px solid var(--border); }
     .tarifa-tabla-comp tr.ttc-max { background: var(--highlight-max) !important; }
     .tarifa-tabla-comp tr.ttc-max td { font-weight: 700; }
     .tarifa-tabla-comp tr.ttc-max td + td { color: var(--navy); }
@@ -352,6 +355,60 @@
       line-height: 1.5;
     }
     .warn-tarifas strong { color: var(--navy); }
+
+    /* ── Selector de fecha/hora (flatpickr) ── */
+    /* Acentos corporativos */
+    .flatpickr-day.selected,
+    .flatpickr-day.selected:hover { background: var(--magenta); border-color: var(--magenta); }
+    .flatpickr-day.today { border-color: var(--magenta); }
+    .flatpickr-day.today:hover { background: var(--magenta); border-color: var(--magenta); color: #fff; }
+    span.flatpickr-weekday { color: var(--navy); }
+
+    /* Flechas de la hora SIEMPRE visibles y más grandes (para mouse sin ruedita) */
+    .flatpickr-time .numInputWrapper { height: 44px; }
+    .flatpickr-time .numInputWrapper span.arrowUp,
+    .flatpickr-time .numInputWrapper span.arrowDown {
+      opacity: 1;
+      width: 26px;
+      right: 0;
+      border-left: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .flatpickr-time .numInputWrapper span.arrowUp { border-bottom: 1px solid var(--border); }
+    .flatpickr-time .numInputWrapper span.arrowUp:after {
+      border-bottom-color: var(--magenta); border-width: 5px; top: 38%;
+    }
+    .flatpickr-time .numInputWrapper span.arrowDown:after {
+      border-top-color: var(--magenta); border-width: 5px; top: 38%;
+    }
+    .flatpickr-time .numInputWrapper span.arrowUp:hover:after { border-bottom-color: var(--navy); }
+    .flatpickr-time .numInputWrapper span.arrowDown:hover:after { border-top-color: var(--navy); }
+    .flatpickr-time input { font-size: 1.15rem; }
+
+    /* Modo oscuro: que el calendario combine con el tema */
+    [data-theme="dark"] .flatpickr-calendar {
+      background: var(--input-bg); color: var(--text);
+      box-shadow: 0 6px 24px rgba(0,0,0,.5);
+    }
+    [data-theme="dark"] .flatpickr-calendar.arrowTop:before,
+    [data-theme="dark"] .flatpickr-calendar.arrowTop:after { border-bottom-color: var(--input-bg); }
+    [data-theme="dark"] .flatpickr-calendar.arrowBottom:before,
+    [data-theme="dark"] .flatpickr-calendar.arrowBottom:after { border-top-color: var(--input-bg); }
+    [data-theme="dark"] .flatpickr-months .flatpickr-month,
+    [data-theme="dark"] .flatpickr-current-month input.cur-year,
+    [data-theme="dark"] .flatpickr-monthDropdown-months,
+    [data-theme="dark"] span.flatpickr-weekday,
+    [data-theme="dark"] .flatpickr-time input,
+    [data-theme="dark"] .flatpickr-time .flatpickr-time-separator { color: var(--text); }
+    [data-theme="dark"] .flatpickr-day { color: var(--text); }
+    [data-theme="dark"] .flatpickr-day.flatpickr-disabled,
+    [data-theme="dark"] .flatpickr-day.prevMonthDay,
+    [data-theme="dark"] .flatpickr-day.nextMonthDay { color: var(--muted); }
+    [data-theme="dark"] .flatpickr-day:hover { background: rgba(255,255,255,.08); }
+    [data-theme="dark"] .flatpickr-time .numInputWrapper span.arrowUp,
+    [data-theme="dark"] .flatpickr-time .numInputWrapper span.arrowDown { background: rgba(255,255,255,.06); }
+    [data-theme="dark"] .flatpickr-months .flatpickr-prev-month svg,
+    [data-theme="dark"] .flatpickr-months .flatpickr-next-month svg { fill: var(--text); }
   </style>
 </head>
 <body>
@@ -390,7 +447,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card card-tarifas">
       <div class="card-title">Tarifas</div>
 
       <table class="tarifa-tabla-comp">
@@ -404,7 +461,10 @@
           <tr><td>2½ horas</td><td>$260</td><td>$310</td></tr>
           <tr><td>3 horas</td><td>$320</td><td>$370</td></tr>
           <tr class="ttc-cap"><td>+3h a 12h (piso)</td><td>$350</td><td>$395</td></tr>
-          <tr class="ttc-max"><td>+12h a 24h (día)</td><td>$600</td><td>$700</td></tr>
+          <tr><td>+12h a 24h (día)</td><td>$600</td><td>$700</td></tr>
+          <tr class="ttc-sep"><td>1 semana</td><td>$2.800</td><td>$2.800</td></tr>
+          <tr><td>2 semanas</td><td>$4.200</td><td>$4.200</td></tr>
+          <tr class="ttc-max"><td>Mes (30 días)</td><td>$4.400</td><td>$4.700</td></tr>
         </tbody>
       </table>
 
@@ -412,10 +472,11 @@
         <div class="tarifa-vehiculo">🚲 Bici</div>
         <div class="tarifa-tabla">
           <div class="tt-row"><span>Por hora</span><span>$13</span></div>
+          <div class="tt-row"><span>Mes (tope)</span><span>$500</span></div>
         </div>
       </div>
 
-      <p class="precio-nota" style="margin-top:12px">Fracción se cobra como tramo completo. Pasadas las 12h se cobra el día completo (24h).</p>
+      <p class="precio-nota" style="margin-top:12px">Se va sumando la fracción, pero <strong>nunca se cobra más que el nivel siguiente</strong> (semana, 2 semanas o mes). Pasado el mes, el ciclo se reinicia.</p>
     </div>
   </div>
 
@@ -434,10 +495,10 @@
     <input type="text" id="patente" placeholder="Ej: ABC 123" maxlength="20" />
 
     <label>Ingreso</label>
-    <input type="datetime-local" id="entrada" />
+    <input type="text" id="entrada" placeholder="Elegí fecha y hora" />
 
     <label>Salida</label>
-    <input type="datetime-local" id="salida" />
+    <input type="text" id="salida" placeholder="Elegí fecha y hora" />
 
     <button class="btn btn-primary" onclick="calcular()">Calcular y guardar</button>
   </div>
@@ -453,6 +514,8 @@
   </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/es.js"></script>
 <script>
   /* ── Lógica de tarifas ── */
 
@@ -616,8 +679,8 @@
   function resetForm() {
     document.getElementById('tipo').value = 'Auto';
     document.getElementById('patente').value = '';
-    document.getElementById('entrada').value = '';
-    document.getElementById('salida').value = '';
+    if (fpEntrada) fpEntrada.clear(); else document.getElementById('entrada').value = '';
+    if (fpSalida)  fpSalida.clear();  else document.getElementById('salida').value  = '';
   }
 
   async function enviarASheets(registro) {
@@ -653,9 +716,15 @@
     const entrada = document.getElementById('entrada').value;
     const salida  = document.getElementById('salida').value;
 
-    if (!entrada || !salida) { alert('Completá la fecha de ingreso y salida.'); return; }
+    // Fechas como objetos Date desde flatpickr (con fallback al texto del input)
+    const eDate = (fpEntrada && fpEntrada.selectedDates[0]) || new Date(entrada);
+    const sDate = (fpSalida  && fpSalida.selectedDates[0])  || new Date(salida);
 
-    const { decimal, facturadas } = horasFraccion(entrada, salida);
+    if (!entrada || !salida || isNaN(eDate) || isNaN(sDate)) {
+      alert('Completá la fecha de ingreso y salida.'); return;
+    }
+
+    const { decimal, facturadas } = horasFraccion(eDate, sDate);
     if (decimal <= 0) { alert('La salida debe ser posterior al ingreso.'); return; }
 
     const totalMin = Math.floor(decimal * 60);
@@ -690,7 +759,7 @@
       `${hDisplay} de estadía · Tarifa: ${tarifa}` + (patente ? ` — ${patente}` : '');
     fechasEl.innerHTML =
       `${tipo}${patente ? ` (${patente})` : ''}<br>` +
-      `<strong>Ingreso:</strong> ${fmt(entrada)} &nbsp;→&nbsp; <strong>Salida:</strong> ${fmt(salida)}`;
+      `<strong>Ingreso:</strong> ${fmt(eDate)} &nbsp;→&nbsp; <strong>Salida:</strong> ${fmt(sDate)}`;
     resEl.classList.add('visible');
 
     resetForm();
@@ -712,6 +781,21 @@
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
   // Sincroniza el ícono del botón al cargar (el tema ya quedó fijado por el script inline del <head>)
   setTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+  // ── Selector de fecha/hora con flechas ▲▼ (flatpickr) ──
+  let fpEntrada = null, fpSalida = null;
+  if (window.flatpickr) {
+    const fpOpts = {
+      enableTime: true,
+      time_24hr: true,
+      dateFormat: 'Y-m-d H:i',
+      locale: (flatpickr.l10ns && flatpickr.l10ns.es) ? 'es' : 'default',
+      minuteIncrement: 1,
+      disableMobile: true,   // usa el picker propio (con flechas) también en celular
+    };
+    fpEntrada = flatpickr('#entrada', fpOpts);
+    fpSalida  = flatpickr('#salida',  fpOpts);
+  }
 
   renderFecha();
 </script>
