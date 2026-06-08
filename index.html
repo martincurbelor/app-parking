@@ -561,11 +561,14 @@
   const H_SEMANA = 7 * 24, H_2SEMANAS = 14 * 24, H_MES = 30 * 24;
 
   // Horas sueltas dentro de un día (resto < 24h)
+  // Escalera: hasta 3h escalonado → hasta 12h piso. Pasadas las 12h, el piso
+  // queda fijo y se REINICIA la escala desde abajo (piso + nueva fracción),
+  // sumando hasta el tope del día.
   function montoFraccionDia(horas, cfg) {
     if (horas <= 0)  return 0;
     if (horas <= 3)  return cfg.tiered(horas);
     if (horas <= 12) return cfg.piso;
-    return cfg.dia;
+    return Math.min(cfg.piso + montoFraccionDia(horas - 12, cfg), cfg.dia);
   }
 
   // Cobro de una estadía de hasta 1 mes (horas en (0, H_MES])
@@ -613,11 +616,13 @@
   }
 
   // ── Modalidad de tarifa aplicada (nivel más alto que alcanzó el cobro) ──
-  function modalidadFraccion(horas) {
+  function modalidadFraccion(horas, cfg) {
     if (horas <= 0)  return '—';
     if (horas <= 3)  return 'Por hora';
     if (horas <= 12) return 'Piso';
-    return 'Diaria';
+    // pasadas 12h: piso + nueva fracción, salvo que ya alcance el día
+    if (cfg.piso + montoFraccionDia(horas - 12, cfg) >= cfg.dia) return 'Diaria';
+    return 'Piso + ' + modalidadFraccion(horas - 12, cfg);
   }
 
   function topeDentroDelMes(horas, cfg) {
@@ -625,7 +630,7 @@
       const dias = Math.floor(horas / 24);
       const rem  = horas - dias * 24;
       if (dias * cfg.dia + montoFraccionDia(rem, cfg) >= cfg.semana) return 'Semana';
-      return dias > 0 ? 'Diaria' : modalidadFraccion(rem);
+      return dias > 0 ? 'Diaria' : modalidadFraccion(rem, cfg);
     }
     if (horas <= H_2SEMANAS) {
       const extra = horas - H_SEMANA;
