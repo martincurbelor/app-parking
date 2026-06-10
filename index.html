@@ -462,14 +462,13 @@
         </thead>
         <tbody>
           <tr><td>1 hora</td><td>$120</td><td>$130</td></tr>
-          <tr><td>1½ horas</td><td>$170</td><td>$190</td></tr>
-          <tr><td>2 horas</td><td>$220</td><td>$245</td></tr>
-          <tr><td>2½ horas</td><td>$260</td><td>$310</td></tr>
-          <tr><td>3 horas</td><td>$320</td><td>$370</td></tr>
-          <tr class="ttc-cap"><td>Piso (3h a 12h)</td><td>$350</td><td>$395</td></tr>
-          <tr><td>Día (tope, 24h)</td><td>$600</td><td>$700</td></tr>
-          <tr class="ttc-sep"><td>Semana (tope, 7d)</td><td>$2.800</td><td>$2.800</td></tr>
-          <tr><td>2 semanas (tope, 14d)</td><td>$4.200</td><td>$4.200</td></tr>
+          <tr><td>1½ horas</td><td>$180</td><td>$195</td></tr>
+          <tr><td>2 horas</td><td>$240</td><td>$260</td></tr>
+          <tr><td>2½ horas</td><td>$300</td><td>$325</td></tr>
+          <tr><td>3 horas</td><td>$360</td><td>$390</td></tr>
+          <tr class="ttc-cap"><td>Piso (3h a 12h)</td><td>$450</td><td>$500</td></tr>
+          <tr><td>Día (tope, 24h)</td><td>$650</td><td>$700</td></tr>
+          <tr class="ttc-sep"><td>Semana (tope, 7d)</td><td>$3.150</td><td>$3.850</td></tr>
           <tr class="ttc-max"><td>Mes (tope, 30d)</td><td>$4.400</td><td>$4.700</td></tr>
         </tbody>
       </table>
@@ -482,7 +481,7 @@
         </div>
       </div>
 
-      <p class="precio-nota" style="margin-top:12px">Cada valor es el <strong>tope</strong> de ese nivel. Al completarse uno, la escala <strong>se reinicia desde abajo</strong> y suma sin superar nunca el nivel siguiente.<br>Ej.: 13h = piso + 1h = $470 &nbsp;·&nbsp; 25h = día + 1h = $720. Pasado el mes, el ciclo se reinicia.</p>
+      <p class="precio-nota" style="margin-top:12px">Cada valor es el <strong>tope</strong> de ese nivel. Al completarse uno, la escala <strong>se reinicia desde abajo</strong> y suma sin superar nunca el nivel siguiente.<br>Ej.: 13h = piso + 1h = $570 &nbsp;·&nbsp; 25h = día + 1h = $770. Pasado el mes, el ciclo se reinicia.</p>
     </div>
   </div>
 
@@ -529,36 +528,36 @@
   function tieredAuto(horas) {
     if (horas <= 0)   return 0;
     if (horas <= 1)   return 120;
-    if (horas <= 1.5) return 170;
-    if (horas <= 2)   return 220;
-    if (horas <= 2.5) return 260;
-    if (horas <= 3)   return 320;
-    return 350;
+    if (horas <= 1.5) return 180;
+    if (horas <= 2)   return 240;
+    if (horas <= 2.5) return 300;
+    if (horas <= 3)   return 360;
+    return 450;
   }
 
   // Tarifa para los primeros 3h (Camioneta)
   function tieredCamioneta(horas) {
     if (horas <= 0)   return 0;
     if (horas <= 1)   return 130;
-    if (horas <= 1.5) return 190;
-    if (horas <= 2)   return 245;
-    if (horas <= 2.5) return 310;
-    if (horas <= 3)   return 370;
-    return 395;
+    if (horas <= 1.5) return 195;
+    if (horas <= 2)   return 260;
+    if (horas <= 2.5) return 325;
+    if (horas <= 3)   return 390;
+    return 500;
   }
 
   // ── Niveles con tope ──
   // Se va sumando la fracción menor (hora → día) pero el cobro NUNCA supera el
   // nivel siguiente. Al alcanzar un nivel, ese precio queda fijo y se vuelve a
   // sumar desde cero hacia el nivel siguiente. Ciclo completo:
-  //   hora → piso (medio día) → día → semana → 2 semanas → mes,
+  //   hora → piso (medio día) → día → semana → mes,
   // y al pasar el mes el ciclo se reinicia (mes + nuevo ciclo).
   const TARIFAS = {
-    Auto:      { tiered: tieredAuto,      piso: 350, dia: 600, semana: 2800, dosSemanas: 4200, mes: 4400 },
-    Camioneta: { tiered: tieredCamioneta, piso: 395, dia: 700, semana: 2800, dosSemanas: 4200, mes: 4700 },
+    Auto:      { tiered: tieredAuto,      piso: 450, dia: 650, semana: 3150, mes: 4400 },
+    Camioneta: { tiered: tieredCamioneta, piso: 500, dia: 700, semana: 3850, mes: 4700 },
   };
 
-  const H_SEMANA = 7 * 24, H_2SEMANAS = 14 * 24, H_MES = 30 * 24;
+  const H_SEMANA = 7 * 24, H_MES = 30 * 24;
 
   // Horas sueltas dentro de un día (resto < 24h)
   // Escalera: hasta 3h escalonado → hasta 12h piso. Pasadas las 12h, el piso
@@ -578,16 +577,10 @@
       const rem  = horas - dias * 24;
       return Math.min(dias * cfg.dia + montoFraccionDia(rem, cfg), cfg.semana);
     }
-    if (horas <= H_2SEMANAS) {                   // 1 a 2 semanas → tope 2 semanas
-      const extra = horas - H_SEMANA;
-      const dias  = Math.floor(extra / 24);
-      const rem   = extra - dias * 24;
-      return Math.min(cfg.semana + dias * cfg.dia + montoFraccionDia(rem, cfg), cfg.dosSemanas);
-    }
-    const extra = horas - H_2SEMANAS;            // 2 semanas a 1 mes → tope mes
+    const extra = horas - H_SEMANA;              // 1 semana a 1 mes → tope mes
     const dias  = Math.floor(extra / 24);
     const rem   = extra - dias * 24;
-    return Math.min(cfg.dosSemanas + dias * cfg.dia + montoFraccionDia(rem, cfg), cfg.mes);
+    return Math.min(cfg.semana + dias * cfg.dia + montoFraccionDia(rem, cfg), cfg.mes);
   }
 
   function calcularMontoVehiculo(horas, cfg) {
@@ -632,18 +625,11 @@
       if (dias * cfg.dia + montoFraccionDia(rem, cfg) >= cfg.semana) return 'Semana';
       return dias > 0 ? 'Diaria' : modalidadFraccion(rem, cfg);
     }
-    if (horas <= H_2SEMANAS) {
-      const extra = horas - H_SEMANA;
-      const dias  = Math.floor(extra / 24);
-      const rem   = extra - dias * 24;
-      if (cfg.semana + dias * cfg.dia + montoFraccionDia(rem, cfg) >= cfg.dosSemanas) return '2 Semanas';
-      return 'Semana';
-    }
-    const extra = horas - H_2SEMANAS;
+    const extra = horas - H_SEMANA;
     const dias  = Math.floor(extra / 24);
     const rem   = extra - dias * 24;
-    if (cfg.dosSemanas + dias * cfg.dia + montoFraccionDia(rem, cfg) >= cfg.mes) return 'Mes';
-    return '2 Semanas';
+    if (cfg.semana + dias * cfg.dia + montoFraccionDia(rem, cfg) >= cfg.mes) return 'Mes';
+    return 'Semana';
   }
 
   function tipoTarifa(tipo, horas) {
